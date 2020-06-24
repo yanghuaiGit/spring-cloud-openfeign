@@ -298,6 +298,7 @@ public class FeignClientFactoryBean
 
 	protected <T> T loadBalance(Feign.Builder builder, FeignContext context,
 			HardCodedTarget<T> target) {
+		// 这里还是从context中获取feignClient数据
 		Client client = getOptional(context, Client.class);
 		if (client != null) {
 			builder.client(client);
@@ -320,9 +321,12 @@ public class FeignClientFactoryBean
 	 * information
 	 */
 	<T> T getTarget() {
+		//获取到feign的上下文 每个服务对应着一个独立的spring容器
 		FeignContext context = this.applicationContext.getBean(FeignContext.class);
+		// builder中包含contract、logLevel、encoder、decoder、options等信息
 		Feign.Builder builder = feign(context);
 
+	// 如果@FeignClient注解上没有指定url，说明是要用ribbon的负载均衡
 		if (!StringUtils.hasText(this.url)) {
 			if (!this.name.startsWith("http")) {
 				this.url = "http://" + this.name;
